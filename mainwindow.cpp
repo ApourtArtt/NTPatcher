@@ -5,9 +5,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     setVector();
-    QByteArray patched  = getFileText("FilePatched");
-    QByteArray original = getFileText("File");
-    runDiff(original, patched);
+    //QByteArray patched  = getFileText("FilePatched");
+    //QByteArray original = getFileText("File");
+    //runDiff(original, patched);
 }
 
 MainWindow::~MainWindow()
