@@ -10,6 +10,7 @@ It is coded in C++ with Qt on Qt Creator.
 - You must put those files in Qt Creator's build folder and debug it.
 - Save those value in the std::vector<s_patch>.
 - Enjoy.
+
 This is extremely boring, but a good exercice for RE, which was this project's goal.
 
 ## For players :
