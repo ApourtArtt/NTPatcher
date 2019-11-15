@@ -5,9 +5,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     setVector();
-    //QByteArray patched  = getFileText("FilePatched");
-    //QByteArray original = getFileText("File");
-    //runDiff(original, patched);
+    QByteArray patched  = getFileText("NostaleClientXZH");
+    QByteArray original = getFileText("NostaleClientX");
+    runDiff(original, patched);
 }
 
 MainWindow::~MainWindow()
@@ -17,12 +17,17 @@ MainWindow::~MainWindow()
 
 void MainWindow::setVector()
 {
-    p_zoomhack.push_back(createVecElem(491593, "v"));
-    p_zoomhack.push_back(createVecElem(491594, "\x6"));
-    p_zoomhack.push_back(createVecElem(491595, "\x0090"));
+    p_zoomhack.push_back(createVecElem(492476, NOP));
+    p_zoomhack.push_back(createVecElem(492477, NOP));
+    p_zoomhack.push_back(createVecElem(492478, NOP));
+    p_zoomhack.push_back(createVecElem(492479, NOP));
+    p_zoomhack.push_back(createVecElem(492480, NOP));
+    p_zoomhack.push_back(createVecElem(492481, NOP));
+    p_zoomhack.push_back(createVecElem(492482, NOP));
+    p_zoomhack.push_back(createVecElem(492483, NOP));
 
-    p_ctrlZ.push_back(createVecElem(2949370, "\x0090"));
-    p_ctrlZ.push_back(createVecElem(2949371, "\x0090"));
+    p_ctrlZ.push_back(createVecElem(2949370, NOP));
+    p_ctrlZ.push_back(createVecElem(2949371, NOP));
 }
 
 s_patch MainWindow::createVecElem(int address, QByteArray byte)

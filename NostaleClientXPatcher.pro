@@ -29,6 +29,7 @@ SOURCES += \
         mainwindow.cpp
 
 HEADERS += \
+        asm_op_code.h \
         mainwindow.h
 
 FORMS += \

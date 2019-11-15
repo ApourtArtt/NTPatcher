@@ -6,6 +6,7 @@
 #include <vector>
 #include <QDebug>
 #include <QCheckBox>
+#include "asm_op_code.h"
 
 
 namespace Ui {
