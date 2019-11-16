@@ -17,7 +17,7 @@ Simple soft allowing you to enable some forbiddden functionnalities on the MMORP
 This is extremely boring, but a good exercice for RE, which was this project's goal.
 
 ## For players
-- Download a release.
+- Download a [release](https://github.com/ApourtArtt/NTPatcher/releases).
 - Enjoy.
 
 ### How to improve this soft
