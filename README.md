@@ -21,5 +21,5 @@ This is extremely boring, but a good exercice for RE, which was this project's g
 - Enjoy.
 
 ### How to improve this soft
-- Set an offset for the address.
+- Find and set an offset for the address.
 - Using pattern can probably help a lot.
