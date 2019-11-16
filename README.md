@@ -19,5 +19,4 @@ This is extremely boring, but a good exercice for RE, which was this project's g
 
 ### How to improve this soft :
 - Set an offset for the address.
-- Nake a link between ASM op-code and hex/unicode value.
-- Use pattern can probably help a lot.
+- Using pattern can probably help a lot.
