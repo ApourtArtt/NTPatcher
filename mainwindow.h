@@ -2,51 +2,33 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QFile>
-#include <vector>
-#include <QDebug>
-#include <QCheckBox>
-#include "asm_op_code.h"
+#include <QFileDialog>
+#include <QMessageBox>
+#include "ui_mainwindow.h"
 
-
-namespace Ui {
-class MainWindow;
-}
-
-struct s_patch
-{
-    int address;
-    QByteArray byte;
-};
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
-
-    void on_PB_EXPORT_clicked();
-
 private:
-    void setVector();
-    s_patch createVecElem(int address, QByteArray byte);
-    void patchBytes(QByteArray *datas);
-    void modifyBit(QByteArray *datas, QCheckBox *checkbox, std::vector<s_patch> patchStruc);
-    bool fillData(QString filename);
-
+    void save();
+    void modify(QString newFilename, QString originalFilename);
+    QByteArray parseOptions(QCheckBox *checkbox, QByteArray pattern, QByteArray newData, QByteArray data);
+    int getBitToBegin(QByteArray pattern, QByteArray data);
+    QByteArray patch(int firstBit, QByteArray newBytes, QByteArray data);
     Ui::MainWindow *ui;
-    QString filename;
-    std::vector<s_patch> p_ctrlZ, p_zoomhack;
 
-
-
-    // DEBUG PURPOSE ONLY
-    QByteArray getFileText(QString filename);
-    void runDiff(QByteArray original, QByteArray cracked);
+    QByteArray pZoom, pCtrlZ, pGfSkipper; // Pattern
+    QByteArray nZoom, nCtrlZ, nGfSkipper; // New data
 };
+
 
 #endif // MAINWINDOW_H

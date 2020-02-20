@@ -1,13 +1,29 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include <QDebug>
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    setVector();
-    QByteArray patched  = getFileText("NostaleClientXZH");
-    QByteArray original = getFileText("NostaleClientX");
-    runDiff(original, patched);
+    connect(ui->PB_BROWSENTDIR, &QPushButton::clicked, this, [=]
+    {
+        QString directory = QFileDialog::getOpenFileName(this, tr("Select NostaleClientX.exe"), QDir::currentPath(), "*.exe");
+        if (!directory.isEmpty())
+            ui->LE_NTDIR->setText(directory);
+    });
+    connect(ui->PB_SAVE, &QPushButton::clicked, this, [=]
+    {
+        save();
+    });
+    pZoom = "\xd8\x5b\x5c\xdf\xe0\x9e\x76\x08\x8b\x43\x5c\xa3????\xd9\x43\x18\0";
+    nZoom = "\xd8\x5b\x5c\xdf\xe0\x9e\xeb\x08\x8b\x43\x5c\xa3????\xd9\x43\x18\0";
+    pCtrlZ = "\x77\x04\x84\xdb\x74\x09\xb2\x01\x8b\xc3\xe8????\x5b\xc3\0";
+    nCtrlZ = "\x77\x04\x90\x90\x74\x09\xb2\x01\x8b\xc3\xe8????\x5b\xc3\0";
+    pGfSkipper = "\xe9????\xa1????\x80\x38\x01\x0f\x85????\xa1????\x8a?\x34\x01\xe8????\x84\xc0\x75\x20\x6a";
+    nGfSkipper = "\xe9????\xa1????\x80\x38\x01\x0f\x85????\xa1????\x8a?\x34\x01\xe9\xb3";
+    nGfSkipper.append('\0');nGfSkipper.append('\0');nGfSkipper.append('\0');
+    nGfSkipper.append("\x84\xc0\x75\x20\x6a");
 }
 
 MainWindow::~MainWindow()
@@ -15,86 +31,89 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::setVector()
+void MainWindow::save()
 {
-    p_zoomhack.push_back(createVecElem(492476, NOP));
-    p_zoomhack.push_back(createVecElem(492477, NOP));
-    p_zoomhack.push_back(createVecElem(492478, NOP));
-    p_zoomhack.push_back(createVecElem(492479, NOP));
-    p_zoomhack.push_back(createVecElem(492480, NOP));
-    p_zoomhack.push_back(createVecElem(492481, NOP));
-    p_zoomhack.push_back(createVecElem(492482, NOP));
-    p_zoomhack.push_back(createVecElem(492483, NOP));
-
-    p_ctrlZ.push_back(createVecElem(2949370, NOP));
-    p_ctrlZ.push_back(createVecElem(2949371, NOP));
-}
-
-s_patch MainWindow::createVecElem(int address, QByteArray byte)
-{
-    s_patch in;
-    in.address = address;
-    in.byte = byte;
-    return in;
-}
-
-void MainWindow::patchBytes(QByteArray *datas)
-{
-    modifyBit(datas, ui->CB_CTRLZ, p_ctrlZ);
-    modifyBit(datas, ui->CB_ZOOM, p_zoomhack);
-}
-
-void MainWindow::modifyBit(QByteArray *datas, QCheckBox *checkbox, std::vector<s_patch> patchStruc)
-{
-    if(checkbox->isChecked())
-        for(unsigned long i = 0 ; i < patchStruc.size() ; i++)
-            datas->replace(patchStruc[i].address, 1, patchStruc[i].byte);
-}
-
-bool MainWindow::fillData(QString filename)
-{
-    QFile outFile(filename + "Patched.exe");
-    QFile inFile(filename + ".exe");
-    QDataStream in(&outFile);
-    if(!outFile.open(QIODevice::WriteOnly))
-        return false;
-    if(!inFile.open(QIODevice::ReadOnly))
-       return false;
-    QByteArray datas = inFile.read(inFile.size());
-    patchBytes(&datas);
-    in.writeRawData(datas, static_cast<int>(inFile.size()));
-    inFile.close();
-    outFile.close();
-    return true;
-}
-
-void MainWindow::on_PB_EXPORT_clicked()
-{
-    fillData("File");
-}
-
-
-
-// DEBUG PURPOSE ONLY
-
-QByteArray MainWindow::getFileText(QString filename)
-{
-    QFile file(filename + ".exe");
-    QDataStream in(&file);
-    if(!file.open(QIODevice::ReadOnly))
-       return "";
-    QByteArray datas = file.read(file.size());
-    in.writeRawData(datas, static_cast<int>(file.size()));
-    file.close();
-    return datas;
-}
-
-void MainWindow::runDiff(QByteArray original, QByteArray cracked)
-{
-    qDebug() << "Size : " << original.size() << " " << cracked.size();
-    for(int i = 0 ; i < original.size() ; i++)
+    QStringList dir = ui->LE_NTDIR->text().split("/");
+    QString file = "";
+    for(int i = 0 ; i < dir.size() - 1 ; i++)
+        file = file + dir[i] + '/';
+    file += ui->LE_NEWFILENAME->text();
+    if (QFile::exists(file))
     {
-        if(original[i] != cracked[i])
-            qDebug() << i << ", Original : " << original[i] << " | Patched : " << cracked[i];
+        ui->statusBar->showMessage(tr("Patched file already exist, please change filename."), 5000);
+        return;
     }
+    modify(file, ui->LE_NTDIR->text());
+}
+
+void MainWindow::modify(QString newFilename, QString originalFilename)
+{
+    QFile ofile(originalFilename);
+    QDataStream inO(&ofile);
+    if(!ofile.open(QIODevice::ReadOnly))
+    {
+        ui->statusBar->showMessage(tr("Something went wrong in original file opening"), 5000);
+        return;
+    }
+    QByteArray data = ofile.read(ofile.size());
+    //data.toHex();
+    ofile.close();
+
+    QFile nfile(newFilename);
+    QDataStream inN(&nfile);
+    if(!nfile.open(QIODevice::WriteOnly))
+    {
+        ui->statusBar->showMessage(tr("Something went wrong in new file opening"), 5000);
+        return;
+    }
+
+    data = parseOptions(ui->CB_CTRLZ, pCtrlZ, nCtrlZ, data);
+    data = parseOptions(ui->CB_ZOOMHACK, pZoom, nZoom, data);
+    data = parseOptions(ui->CB_GFSKIPPER, pGfSkipper, nGfSkipper, data);
+
+    inN.writeRawData(data, data.size());
+    nfile.close();
+}
+
+QByteArray MainWindow::parseOptions(QCheckBox *checkbox, QByteArray pattern, QByteArray newData, QByteArray data)
+{
+    if(!(checkbox->isChecked()))
+        return data;
+    int firstBit = getBitToBegin(pattern, data);
+    if(firstBit == -1)
+        return data;
+    return patch(firstBit, newData, data);
+}
+
+int MainWindow::getBitToBegin(QByteArray pattern, QByteArray data)
+{
+    for(int i = 0 ; i < data.size() ; i++)
+    {
+        if(data[i] == pattern[0])
+        {
+            int j = 0;
+            bool equal = true;
+            for(; j < pattern.size() ; j++)
+            {
+                if(pattern[j] != data[i+j] && pattern[j] != '?')
+                {
+                    equal = false;
+                    break;
+                }
+            }
+            if(equal)
+                return i;
+        }
+    }
+    return -1;
+}
+
+QByteArray MainWindow::patch(int firstBit, QByteArray newBytes, QByteArray data)
+{
+    for(int i = 0 ; i < newBytes.size() ; i++)
+    {
+        if(newBytes[i] != '?')
+            data[i+firstBit] = newBytes[i];
+    }
+    return data;
 }
