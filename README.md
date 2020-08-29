@@ -1,4 +1,4 @@
-# NTPatcher
+# NTPatcher (Outdated)
 It is coded in C++ with Qt on Qt Creator.
 Simple soft allowing you to enable some forbiddden functionnalities on the MMORPG NosTale.
 
@@ -30,3 +30,7 @@ pattern would be `QByteArray pMyPattern"\xc6\x00\x00\x8d\x45\xcc\x50\x8d\x55\xc8
 ## For players
 - Download a [release](https://github.com/ApourtArtt/NTPatcher/releases).
 - Enjoy.
+
+
+
+NOT UPDATED - Don't use it
